@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Card peeking out behind the wallet -->
+    <path
+        android:fillColor="#34D1B0"
+        android:pathData="M44,36 L74,36 Q80,36 80,42 L80,48 L40,48 L40,42 Q40,36 44,36 Z" />
+    <!-- Wallet body -->
+    <path
+        android:fillColor="#6C9FFF"
+        android:pathData="M38,44 L70,44 Q78,44 78,52 L78,66 Q78,74 70,74 L38,74 Q30,74 30,66 L30,52 Q30,44 38,44 Z" />
+    <!-- Clasp -->
+    <path
+        android:fillColor="#0B1626"
+        android:pathData="M72,59 a5,5 0 1,0 0.01,0 Z" />
+    <!-- Rising trend line inside the wallet -->
+    <path
+        android:strokeColor="#0B1626"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M37,66 L46,60 L53,63 L64,53" />
+</vector>

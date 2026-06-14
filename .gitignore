@@ -1,0 +1,38 @@
+# Gradle / Android build output
+.gradle/
+.kotlin/
+build/
+*/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Android Studio / IntelliJ local state
+*.iml
+.idea/
+
+# VS Code local state
+.vscode/
+
+# Machine-local SDK paths and secrets
+local.properties
+gradle.properties
+
+# Firebase config is environment-specific
+google-services.json
+app/google-services.json
+
+# Signing keys and release artifacts
+*.jks
+*.keystore
+*.p12
+*.pem
+*.apk
+*.aab
+*.ap_
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
