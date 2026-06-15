@@ -18,31 +18,20 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.Color
@@ -58,6 +47,8 @@ import com.example.morawallet.core.ui.components.MoraErrorBanner
 import com.example.morawallet.core.ui.components.MoraTextField
 import com.example.morawallet.core.ui.components.MessageType
 import com.example.morawallet.core.ui.components.WalletPicker
+import com.example.morawallet.core.ui.components.showNativeDatePicker
+import com.example.morawallet.core.ui.components.showNativeTimePicker
 import com.example.morawallet.core.util.Categories
 import com.example.morawallet.core.util.DateUtils
 import com.example.morawallet.data.model.TransactionType
@@ -281,18 +272,23 @@ private fun CategorySelector(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DateField(
     date: Long,
     error: String?,
     onDateChange: (Long) -> Unit,
 ) {
-    var showPicker by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Column {
         Text("Date", style = MaterialTheme.typography.labelLarge)
         Button(
-            onClick = { showPicker = true },
+            onClick = {
+                showNativeDatePicker(
+                    context = context,
+                    initialMillis = date,
+                    onSelected = onDateChange,
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 6.dp),
@@ -319,44 +315,24 @@ private fun DateField(
             )
         }
     }
-    if (showPicker) {
-        val pickerState = rememberDatePickerState(
-            initialSelectedDateMillis = date,
-            selectableDates = object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                    !DateUtils.isFutureDay(utcTimeMillis)
-            },
-        )
-        DatePickerDialog(
-            onDismissRequest = { showPicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        pickerState.selectedDateMillis?.let(onDateChange)
-                        showPicker = false
-                    },
-                ) { Text("OK") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPicker = false }) { Text("Cancel") }
-            },
-        ) {
-            DatePicker(state = pickerState)
-        }
-    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimeField(
     date: Long,
     onTimeChange: (Int, Int) -> Unit,
 ) {
-    var showPicker by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Column {
         Text("Time", style = MaterialTheme.typography.labelLarge)
         Button(
-            onClick = { showPicker = true },
+            onClick = {
+                showNativeTimePicker(
+                    context = context,
+                    initialMillis = date,
+                    onSelected = onTimeChange,
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 6.dp),
@@ -372,27 +348,5 @@ private fun TimeField(
                     .weight(1f),
             )
         }
-    }
-    if (showPicker) {
-        val pickerState = rememberTimePickerState(
-            initialHour = DateUtils.hourOf(date),
-            initialMinute = DateUtils.minuteOf(date),
-            is24Hour = true,
-        )
-        AlertDialog(
-            onDismissRequest = { showPicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onTimeChange(pickerState.hour, pickerState.minute)
-                        showPicker = false
-                    },
-                ) { Text("OK") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPicker = false }) { Text("Cancel") }
-            },
-            text = { TimePicker(state = pickerState) },
-        )
     }
 }

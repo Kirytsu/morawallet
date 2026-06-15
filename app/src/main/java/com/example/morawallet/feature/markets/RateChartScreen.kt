@@ -144,7 +144,7 @@ private fun RateSummaryCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
     ) {
         Column(modifier = Modifier.padding(Spacing.lg)) {
-            Text("1 $base equals", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.82f))
+            Text("1 $base equals", style = MaterialTheme.typography.labelMedium, color = Color.White)
             Text(
                 text = current?.let { "%.4f $quote".format(it) } ?: "-",
                 style = MaterialTheme.typography.headlineMedium,

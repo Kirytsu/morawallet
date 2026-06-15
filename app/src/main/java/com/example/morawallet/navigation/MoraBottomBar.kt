@@ -1,6 +1,7 @@
 package com.example.morawallet.navigation
 
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -31,9 +32,9 @@ fun MoraBottomBar(
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = accent,
                     selectedTextColor = accent,
-                    indicatorColor = accent.copy(alpha = 0.14f),
-                    unselectedIconColor = accent.copy(alpha = 0.58f),
-                    unselectedTextColor = accent.copy(alpha = 0.74f),
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
             )
         }

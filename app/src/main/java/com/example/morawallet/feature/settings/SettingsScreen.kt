@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.example.morawallet.core.ui.components.LetterAvatar
 import com.example.morawallet.core.ui.components.LoadingView
 import com.example.morawallet.core.ui.components.LocalSnackbarController
+import com.example.morawallet.core.ui.components.CurrencyPicker
 import com.example.morawallet.core.ui.components.MoraButton
 import com.example.morawallet.core.ui.components.MoraConfirmDialog
 import com.example.morawallet.core.ui.components.MoraErrorBanner
@@ -240,64 +241,12 @@ private fun BaseCurrencyRow(
     selected: String,
     onSelect: (String) -> Unit,
 ) {
-    var showPicker by remember { mutableStateOf(false) }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { showPicker = true }
-            .padding(Spacing.lg),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text("Base currency", style = MaterialTheme.typography.bodyLarge)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                selected,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-        }
-    }
-
-    if (showPicker) {
-        AlertDialog(
-            onDismissRequest = { showPicker = false },
-            title = { Text("Base currency") },
-            text = {
-                LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
-                    items(Currencies.ALL) { currency ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onSelect(currency.code)
-                                    showPicker = false
-                                }
-                                .padding(vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                currency.code,
-                                style = MaterialTheme.typography.titleSmall,
-                                modifier = Modifier.width(64.dp),
-                            )
-                            Text(
-                                currency.displayName,
-                                style = MaterialTheme.typography.bodyMedium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f),
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showPicker = false }) { Text("Cancel") }
-            },
-        )
-    }
+    CurrencyPicker(
+        selected = selected,
+        onSelect = onSelect,
+        label = "Base currency",
+        modifier = Modifier.padding(Spacing.lg),
+    )
 }
 
 @Composable

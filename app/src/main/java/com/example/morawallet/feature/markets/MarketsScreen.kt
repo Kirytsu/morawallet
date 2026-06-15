@@ -113,7 +113,7 @@ private fun MarketHeader(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Base currency", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.86f))
+                Text("Base currency", style = MaterialTheme.typography.labelMedium, color = Color.White)
                 Text(
                     baseCurrency,
                     style = MaterialTheme.typography.headlineSmall,
@@ -123,7 +123,7 @@ private fun MarketHeader(
                 Text(
                     if (date.isNotEmpty()) "Updated $date" else Currencies.displayName(baseCurrency),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.82f),
+                    color = Color.White,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -150,7 +150,7 @@ private fun RateCard(
             .fillMaxWidth()
             .heightIn(min = 136.dp),
         colors = CardDefaults.cardColors(containerColor = color),
-        border = BorderStroke(1.dp, color.copy(alpha = 0.26f)),
+        border = BorderStroke(1.dp, content),
     ) {
         Column(
             modifier = Modifier
@@ -163,17 +163,17 @@ private fun RateCard(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
-                        .background(content.copy(alpha = 0.16f)),
+                        .background(content),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(Currencies.symbol(code), color = content, style = MaterialTheme.typography.labelLarge)
+                    Text(Currencies.symbol(code), color = color, style = MaterialTheme.typography.labelLarge)
                 }
                 Column(modifier = Modifier.padding(start = Spacing.sm).weight(1f)) {
                     Text(code, style = MaterialTheme.typography.titleMedium, color = content)
                     Text(
                         Currencies.displayName(code),
                         style = MaterialTheme.typography.bodySmall,
-                        color = content.copy(alpha = 0.74f),
+                        color = content,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -186,7 +186,7 @@ private fun RateCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Text("Tap for history", style = MaterialTheme.typography.labelSmall, color = content.copy(alpha = 0.72f))
+            Text("Tap for history", style = MaterialTheme.typography.labelSmall, color = content)
         }
     }
 }

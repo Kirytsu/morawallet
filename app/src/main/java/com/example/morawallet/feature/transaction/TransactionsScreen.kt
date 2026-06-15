@@ -2,7 +2,6 @@ package com.example.morawallet.feature.transaction
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,21 +28,17 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,6 +61,7 @@ import com.example.morawallet.core.ui.components.EmptyView
 import com.example.morawallet.core.ui.components.ErrorView
 import com.example.morawallet.core.ui.components.LoadingView
 import com.example.morawallet.core.ui.components.TransactionRow
+import com.example.morawallet.core.ui.components.showNativeDatePicker
 import com.example.morawallet.core.util.Categories
 import com.example.morawallet.core.util.CurrencyFormatter
 import com.example.morawallet.core.util.DateUtils
@@ -265,9 +262,15 @@ private fun DateButton(
     onPick: (Long?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showPicker by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Button(
-        onClick = { showPicker = true },
+        onClick = {
+            showNativeDatePicker(
+                context = context,
+                initialMillis = millis ?: System.currentTimeMillis(),
+                onSelected = { onPick(it) },
+            )
+        },
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
     ) {
@@ -279,29 +282,6 @@ private fun DateButton(
             overflow = TextOverflow.Ellipsis,
         )
     }
-    if (showPicker) {
-        val pickerState = rememberDatePickerState(
-            initialSelectedDateMillis = millis,
-            selectableDates = object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                    !DateUtils.isFutureDay(utcTimeMillis)
-            },
-        )
-        DatePickerDialog(
-            onDismissRequest = { showPicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onPick(pickerState.selectedDateMillis)
-                        showPicker = false
-                    },
-                ) { Text("OK") }
-            },
-            dismissButton = { TextButton(onClick = { showPicker = false }) { Text("Cancel") } },
-        ) {
-            DatePicker(state = pickerState)
-        }
-    }
 }
 
 @Composable
@@ -310,59 +290,57 @@ private fun WalletFilterButton(
     wallets: List<Wallet>,
     onSelect: (String?) -> Unit,
 ) {
-    var showPicker by remember { mutableStateOf(false) }
-    Button(
-        onClick = { showPicker = true },
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-    ) {
-        Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, modifier = Modifier.size(18.dp))
-        Text(
-            selectedWallet?.let { "${it.name} (${it.currencyCode})" } ?: "All wallets",
-            modifier = Modifier
-                .padding(horizontal = Spacing.sm)
-                .weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Icon(Icons.Filled.ArrowDropDown, contentDescription = null, modifier = Modifier.size(18.dp))
-    }
-
-    if (showPicker) {
-        AlertDialog(
-            onDismissRequest = { showPicker = false },
-            title = { Text("Choose wallet") },
-            text = {
-                LazyColumn(modifier = Modifier.heightIn(max = 320.dp)) {
-                    item {
-                        WalletChoiceRow("All wallets", null) {
-                            onSelect(null)
-                            showPicker = false
-                        }
-                    }
-                    items(wallets, key = { it.id }) { wallet ->
-                        WalletChoiceRow(wallet.name, wallet.currencyCode) {
-                            onSelect(wallet.id)
-                            showPicker = false
-                        }
-                    }
-                }
-            },
-            confirmButton = { TextButton(onClick = { showPicker = false }) { Text("Cancel") } },
-        )
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Button(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+        ) {
+            Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, modifier = Modifier.size(18.dp))
+            Text(
+                selectedWallet?.let { "${it.name} (${it.currencyCode})" } ?: "All wallets",
+                modifier = Modifier
+                    .padding(horizontal = Spacing.sm)
+                    .weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null, modifier = Modifier.size(18.dp))
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.heightIn(max = 320.dp),
+        ) {
+            DropdownMenuItem(
+                text = { WalletChoiceText("All wallets", null) },
+                onClick = {
+                    onSelect(null)
+                    expanded = false
+                },
+            )
+            wallets.forEach { wallet ->
+                DropdownMenuItem(
+                    text = { WalletChoiceText(wallet.name, wallet.currencyCode) },
+                    onClick = {
+                        onSelect(wallet.id)
+                        expanded = false
+                    },
+                )
+            }
+        }
     }
 }
 
 @Composable
-private fun WalletChoiceRow(
+private fun WalletChoiceText(
     name: String,
     code: String?,
-    onClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -503,13 +481,14 @@ private fun CategoryCard(
     icon: ImageVector,
     onClick: () -> Unit,
 ) {
-    val background = if (selected) color else color.copy(alpha = 0.12f)
+    val background = if (selected) color else MaterialTheme.colorScheme.surfaceVariant
     val content = if (selected && background.luminance() <= 0.45f) Color.White else Color(0xFF102033)
+    val iconContent = if (color.luminance() > 0.45f) Color(0xFF102033) else Color.White
     Card(
         onClick = onClick,
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = background),
-        border = BorderStroke(1.dp, color.copy(alpha = if (selected) 0.52f else 0.26f)),
+        border = BorderStroke(1.dp, if (selected) color else MoraTheme.colors.borderStrong),
     ) {
         Column(
             modifier = Modifier
@@ -526,10 +505,10 @@ private fun CategoryCard(
                     modifier = Modifier
                         .size(30.dp)
                         .clip(CircleShape)
-                        .background(color.copy(alpha = if (selected) 0.22f else 0.16f)),
+                        .background(if (selected) content else color),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(icon, contentDescription = null, tint = if (selected) content else color, modifier = Modifier.size(17.dp))
+                    Icon(icon, contentDescription = null, tint = if (selected) color else iconContent, modifier = Modifier.size(17.dp))
                 }
                 Text(
                     "${(percent * 100).toInt()}%",
@@ -548,7 +527,7 @@ private fun CategoryCard(
             Text(
                 label,
                 style = MaterialTheme.typography.bodySmall,
-                color = content.copy(alpha = 0.74f),
+                color = content,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -577,10 +556,10 @@ private fun RecordsHeader(
         Text(
             "$count",
             style = MaterialTheme.typography.labelLarge,
-            color = typeAccent(state.recordType),
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
             modifier = Modifier
                 .padding(start = Spacing.sm)
-                .background(typeAccent(state.recordType).copy(alpha = 0.12f), CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
                 .padding(horizontal = 10.dp, vertical = 4.dp),
         )
     }
