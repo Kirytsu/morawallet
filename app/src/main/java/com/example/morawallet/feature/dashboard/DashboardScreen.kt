@@ -277,10 +277,10 @@ private fun QuickTile(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(Color.White),
+                    .background(Color.White.copy(alpha = 0.22f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(22.dp))
+                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(22.dp))
             }
             Spacer(Modifier.size(Spacing.xs))
             Text(label, style = MaterialTheme.typography.labelLarge, color = Color.White)

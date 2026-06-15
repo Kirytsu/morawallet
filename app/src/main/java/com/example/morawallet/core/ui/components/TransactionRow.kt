@@ -38,11 +38,12 @@ fun TransactionRow(
     val subtitle = when (transaction.typeEnum) {
         TransactionType.TRANSFER -> {
             val dest = walletsById[transaction.toWalletId]?.name ?: "-"
-            "$sourceName -> $dest"
+            "$sourceName → $dest"
         }
-
-        else -> if (transaction.note.isNotBlank()) "$sourceName - ${transaction.note}" else sourceName
+        else -> sourceName
     }
+    // Show note on its own line only when the title already shows the category
+    val showNote = transaction.note.isNotBlank() && transaction.category.isNotBlank()
     val amountText = when (transaction.typeEnum) {
         TransactionType.INCOME -> "+" + CurrencyFormatter.format(transaction.amount, transaction.currencyCode)
         TransactionType.EXPENSE -> "-" + CurrencyFormatter.format(transaction.amount, transaction.currencyCode)
@@ -81,12 +82,21 @@ fun TransactionRow(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    "${DateUtils.formatTime(transaction.date)} - $subtitle",
+                    "${DateUtils.formatTime(transaction.date)} · $subtitle",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                if (showNote) {
+                    Text(
+                        transaction.note,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             Text(
                 text = amountText,

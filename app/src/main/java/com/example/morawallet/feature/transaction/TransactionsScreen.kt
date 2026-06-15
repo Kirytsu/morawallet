@@ -245,8 +245,8 @@ private fun TypeChip(
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (selected) color else MaterialTheme.colorScheme.primary,
-            contentColor = Color.White,
+            containerColor = if (selected) color else color.copy(alpha = 0.12f),
+            contentColor = if (selected) Color.White else color,
         ),
     ) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -272,7 +272,10 @@ private fun DateButton(
             )
         },
         modifier = modifier,
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (millis != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = if (millis != null) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+        ),
     ) {
         Icon(Icons.Filled.CalendarMonth, contentDescription = null, modifier = Modifier.size(18.dp))
         Text(
@@ -295,7 +298,10 @@ private fun WalletFilterButton(
         Button(
             onClick = { expanded = true },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (selectedWallet != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = if (selectedWallet != null) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
         ) {
             Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, modifier = Modifier.size(18.dp))
             Text(
@@ -364,7 +370,6 @@ private fun WalletChoiceText(
 private fun ReportChartCard(state: TransactionsUiState) {
     val breakdown = state.categoryBreakdown
     val total = breakdown.sumOf { it.second }
-    val palette = MoraTheme.colors.chart
     val typeText = typeLabel(state.recordType)
 
     Card(
@@ -403,8 +408,8 @@ private fun ReportChartCard(state: TransactionsUiState) {
                 )
             } else {
                 DonutChart(
-                    slices = breakdown.take(8).mapIndexed { i, item ->
-                        DonutSlice(item.second, palette[i % palette.size])
+                    slices = breakdown.take(8).map { item ->
+                        DonutSlice(item.second, paletteColor(Categories.colorIndex(item.first)))
                     },
                     diameter = 190.dp,
                     centerLabel = "Total",
@@ -439,7 +444,7 @@ private fun CategoryGrid(
         return
     }
 
-    val allItems = listOf(null to total) + breakdown.map { it.first to it.second }
+    val allItems = breakdown.map { it.first to it.second }
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         allItems.chunked(2).forEach { rowItems ->
             Row(

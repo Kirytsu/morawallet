@@ -74,6 +74,11 @@ class MarketsViewModel(
         viewModelScope.launch { loadRates(state.baseCurrency) }
     }
 
+    fun setBaseCurrency(code: String) {
+        state = state.copy(baseCurrency = code)
+        viewModelScope.launch { loadRates(code) }
+    }
+
     fun setQuery(value: String) {
         state = state.copy(query = value)
     }

@@ -52,7 +52,7 @@ fun RateChartScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("$base / $quote") },
+                title = { Text("${state.displayBase} / ${state.displayQuote}") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -71,7 +71,12 @@ fun RateChartScreen(
             val current = state.points.lastOrNull()?.value
             val first = state.points.firstOrNull()?.value
 
-            RateSummaryCard(base = base, quote = quote, current = current, first = first)
+            RateSummaryCard(
+                displayBase = state.displayBase,
+                displayQuote = state.displayQuote,
+                current = current,
+                first = first,
+            )
 
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 ranges.forEach { (days, label) ->
@@ -113,7 +118,7 @@ fun RateChartScreen(
                             values = state.points.map { it.value },
                             labels = state.points.map { it.date },
                             lineColor = MaterialTheme.colorScheme.primary,
-                            valueFormat = { "%.4f".format(it) },
+                            valueFormat = { formatRate(it) },
                             modifier = Modifier.padding(Spacing.md),
                             height = 250.dp,
                         )
@@ -122,8 +127,8 @@ fun RateChartScreen(
                     val low = state.points.minOf { it.value }
                     ChartLegend(
                         entries = listOf(
-                            LegendEntry("High", MoraTheme.colors.income, "%.4f".format(high)),
-                            LegendEntry("Low", MoraTheme.colors.expense, "%.4f".format(low)),
+                            LegendEntry("High", MoraTheme.colors.income, formatRate(high)),
+                            LegendEntry("Low", MoraTheme.colors.expense, formatRate(low)),
                         ),
                     )
                 }
@@ -134,8 +139,8 @@ fun RateChartScreen(
 
 @Composable
 private fun RateSummaryCard(
-    base: String,
-    quote: String,
+    displayBase: String,
+    displayQuote: String,
     current: Double?,
     first: Double?,
 ) {
@@ -144,9 +149,9 @@ private fun RateSummaryCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
     ) {
         Column(modifier = Modifier.padding(Spacing.lg)) {
-            Text("1 $base equals", style = MaterialTheme.typography.labelMedium, color = Color.White)
+            Text("1 $displayBase equals", style = MaterialTheme.typography.labelMedium, color = Color.White)
             Text(
-                text = current?.let { "%.4f $quote".format(it) } ?: "-",
+                text = current?.let { "${formatRate(it)} $displayQuote" } ?: "-",
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White,
             )

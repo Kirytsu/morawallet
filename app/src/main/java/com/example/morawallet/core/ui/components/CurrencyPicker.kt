@@ -10,10 +10,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.morawallet.core.util.Currencies
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CurrencyPicker(
     selected: String,
@@ -37,13 +40,19 @@ fun CurrencyPicker(
     var expanded by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
         Text(label, style = MaterialTheme.typography.labelLarge)
-        androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth()) {
+        ExposedDropdownMenuBox(
+            expanded = expanded && enabled,
+            onExpandedChange = { if (enabled) expanded = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp),
+        ) {
             Button(
-                onClick = { expanded = true },
+                onClick = {},
                 enabled = enabled,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 6.dp),
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -58,8 +67,8 @@ fun CurrencyPicker(
                 )
                 Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
             }
-            DropdownMenu(
-                expanded = expanded,
+            ExposedDropdownMenu(
+                expanded = expanded && enabled,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.heightIn(max = 360.dp),
             ) {

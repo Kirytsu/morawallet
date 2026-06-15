@@ -15,6 +15,9 @@ data class RateChartUiState(
     val points: List<RatePoint> = emptyList(),
     val days: Int = 30,
     val error: String? = null,
+    val displayBase: String = "",
+    val displayQuote: String = "",
+    val isInverted: Boolean = false,
 )
 
 class RateChartViewModel(
@@ -23,7 +26,7 @@ class RateChartViewModel(
     private val quote: String,
 ) : ViewModel() {
 
-    var state by mutableStateOf(RateChartUiState())
+    var state by mutableStateOf(RateChartUiState(displayBase = base, displayQuote = quote))
         private set
 
     init {
@@ -39,7 +42,19 @@ class RateChartViewModel(
         viewModelScope.launch {
             state = state.copy(loading = true, error = null)
             state = when (val result = exchangeRateRepository.getTimeseries(base, quote, state.days)) {
-                is Resource.Success -> state.copy(loading = false, points = result.data)
+                is Resource.Success -> {
+                    val raw = result.data
+                    val latestRate = raw.lastOrNull()?.value ?: 1.0
+                    val invert = latestRate > 0.0 && latestRate < 0.01
+                    val points = if (invert) raw.map { RatePoint(it.date, 1.0 / it.value) } else raw
+                    state.copy(
+                        loading = false,
+                        points = points,
+                        isInverted = invert,
+                        displayBase = if (invert) quote else base,
+                        displayQuote = if (invert) base else quote,
+                    )
+                }
                 is Resource.Error -> state.copy(loading = false, error = result.message)
                 Resource.Loading -> state
             }

@@ -1,8 +1,6 @@
 package com.example.morawallet.core.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.morawallet.core.util.Currencies
@@ -38,7 +35,7 @@ fun WalletCard(
     modifier: Modifier = Modifier,
 ) {
     val background = paletteColor(colorIndex)
-    val content = if (background.luminance() > 0.45f) Color(0xFF111827) else Color.White
+    val content = Color.White
 
     Card(
         onClick = onClick,
@@ -46,7 +43,6 @@ fun WalletCard(
             .fillMaxWidth()
             .heightIn(min = 112.dp),
         colors = CardDefaults.cardColors(containerColor = background),
-        border = BorderStroke(1.dp, content),
     ) {
         Column(
             modifier = Modifier
@@ -55,11 +51,7 @@ fun WalletCard(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                WalletCurrencyMark(
-                    currencyCode = currencyCode,
-                    backgroundColor = background,
-                    contentColor = content,
-                )
+                WalletCurrencyMark(currencyCode = currencyCode)
                 Column(modifier = Modifier.padding(start = 12.dp).weight(1f)) {
                     Text(
                         name,
@@ -89,23 +81,18 @@ fun WalletCard(
 }
 
 @Composable
-private fun WalletCurrencyMark(
-    currencyCode: String,
-    backgroundColor: Color,
-    contentColor: Color,
-) {
+private fun WalletCurrencyMark(currencyCode: String) {
     Box(
         modifier = Modifier
             .size(44.dp)
             .clip(CircleShape)
-            .background(contentColor)
-            .border(1.dp, contentColor, CircleShape),
+            .background(Color.White.copy(alpha = 0.25f)),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = Currencies.symbol(currencyCode),
             style = MaterialTheme.typography.titleMedium,
-            color = backgroundColor,
+            color = Color.White,
         )
     }
 }
