@@ -1,6 +1,7 @@
 package com.example.morawallet.feature.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -90,7 +91,17 @@ fun DashboardScreen(
         contentPadding = PaddingValues(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        item { PortfolioCard(state.baseCurrency, state.portfolioValue, state.rangeIncome, state.rangeExpense, state.wallets.size) }
+        item {
+            PortfolioCard(
+                base = state.baseCurrency,
+                value = state.portfolioValue,
+                income = state.rangeIncome,
+                expense = state.rangeExpense,
+                walletCount = state.wallets.size,
+                onIncomeClick = { onAddTransaction(TransactionType.INCOME.name) },
+                onExpenseClick = { onAddTransaction(TransactionType.EXPENSE.name) },
+            )
+        }
         item { QuickAddRow(onAddTransaction) }
 
         item { SectionHeader("Wallets", Icons.Filled.AccountBalanceWallet, if (state.wallets.isEmpty()) null else onSeeAllWallets) }
@@ -164,48 +175,72 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun PortfolioCard(base: String, value: Double, income: Double, expense: Double, walletCount: Int) {
+private fun PortfolioCard(
+    base: String,
+    value: Double,
+    income: Double,
+    expense: Double,
+    walletCount: Int,
+    onIncomeClick: () -> Unit,
+    onExpenseClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val white = Color.White
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(Spacing.xl),
         ) {
-            Column(Modifier.fillMaxWidth()) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Filled.AccountBalanceWallet,
-                        contentDescription = null,
-                        tint = white,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Total balance", style = MaterialTheme.typography.labelLarge, color = white)
-                }
-                Text(
-                    text = CurrencyFormatter.format(value, base),
-                    style = MoneyTextStyle,
-                    color = white,
-                    modifier = Modifier.padding(top = Spacing.sm),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(
+                    Icons.Filled.AccountBalanceWallet,
+                    contentDescription = null,
+                    tint = white,
+                    modifier = Modifier.size(18.dp),
                 )
-                Text(
-                    text = "Across $walletCount wallet${if (walletCount == 1) "" else "s"} - shown in $base",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = white,
+                Spacer(Modifier.width(8.dp))
+                Text("Total balance", style = MaterialTheme.typography.labelLarge, color = white)
+            }
+            Text(
+                text = CurrencyFormatter.formatCompact(value, base),
+                style = MoneyTextStyle,
+                color = white,
+                modifier = Modifier.padding(top = Spacing.sm),
+            )
+            Text(
+                text = "Across $walletCount wallet${if (walletCount == 1) "" else "s"} - shown in $base",
+                style = MaterialTheme.typography.bodySmall,
+                color = white,
+            )
+            Spacer(Modifier.size(Spacing.lg))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                FlowPill(
+                    icon = Icons.Filled.ArrowUpward,
+                    label = "Income",
+                    value = CurrencyFormatter.formatCompact(income, base),
+                    tint = MoraTheme.colors.income,
+                    onClick = onIncomeClick,
+                    modifier = Modifier.weight(1f),
                 )
-                Spacer(Modifier.size(Spacing.lg))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                ) {
-                    FlowPill(Icons.Filled.ArrowUpward, "Income", CurrencyFormatter.format(income, base), MoraTheme.colors.income, Modifier.weight(1f))
-                    FlowPill(Icons.Filled.ArrowDownward, "Expense", CurrencyFormatter.format(expense, base), MoraTheme.colors.expense, Modifier.weight(1f))
-                }
+                FlowPill(
+                    icon = Icons.Filled.ArrowDownward,
+                    label = "Expense",
+                    value = CurrencyFormatter.formatCompact(expense, base),
+                    tint = MoraTheme.colors.expense,
+                    onClick = onExpenseClick,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }
@@ -216,7 +251,8 @@ private fun FlowPill(
     icon: ImageVector,
     label: String,
     value: String,
-    tint: androidx.compose.ui.graphics.Color,
+    tint: Color,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val white = Color.White
@@ -224,6 +260,7 @@ private fun FlowPill(
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .background(tint)
+            .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -231,10 +268,10 @@ private fun FlowPill(
             modifier = Modifier
                 .size(28.dp)
                 .clip(androidx.compose.foundation.shape.CircleShape)
-                .background(Color.White),
+                .background(Color.White.copy(alpha = 0.22f)),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
+            Icon(icon, contentDescription = null, tint = white, modifier = Modifier.size(16.dp))
         }
         Spacer(Modifier.width(8.dp))
         Column {
@@ -257,7 +294,7 @@ private fun QuickAddRow(onAddTransaction: (String) -> Unit) {
 private fun QuickTile(
     label: String,
     icon: ImageVector,
-    tint: androidx.compose.ui.graphics.Color,
+    tint: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
@@ -376,8 +413,8 @@ private fun IncomeExpenseCard(state: DashboardUiState) {
                 )
                 ChartLegend(
                     entries = listOf(
-                        LegendEntry("Income", MoraTheme.colors.income, CurrencyFormatter.format(state.rangeIncome, state.baseCurrency)),
-                        LegendEntry("Expense", MoraTheme.colors.expense, CurrencyFormatter.format(state.rangeExpense, state.baseCurrency)),
+                        LegendEntry("Income", MoraTheme.colors.income, CurrencyFormatter.formatCompact(state.rangeIncome, state.baseCurrency)),
+                        LegendEntry("Expense", MoraTheme.colors.expense, CurrencyFormatter.formatCompact(state.rangeExpense, state.baseCurrency)),
                     ),
                 )
             }
@@ -445,14 +482,14 @@ private fun CategoryBreakdownCard(
                         slices = top.mapIndexed { i, s -> DonutSlice(s.amount, palette[i % palette.size]) },
                         diameter = 150.dp,
                         centerLabel = if (isIncome) "Earned" else "Spent",
-                        centerValue = CurrencyFormatter.format(total, state.baseCurrency),
+                        centerValue = CurrencyFormatter.formatCompact(total, state.baseCurrency),
                     )
                     ChartLegend(
                         entries = top.mapIndexed { i, s ->
                             LegendEntry(
                                 label = s.category,
                                 color = palette[i % palette.size],
-                                value = CurrencyFormatter.format(s.amount, state.baseCurrency),
+                                value = CurrencyFormatter.formatCompact(s.amount, state.baseCurrency),
                                 percent = (s.amount / total * 100).toFloat(),
                             )
                         },
@@ -505,7 +542,7 @@ private fun CategoryCards(
                         )
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(CurrencyFormatter.format(slice.amount, currency), style = MaterialTheme.typography.labelLarge)
+                        Text(CurrencyFormatter.formatCompact(slice.amount, currency), style = MaterialTheme.typography.labelLarge)
                         Text(
                             "${(slice.amount / total * 100).toInt()}%",
                             style = MaterialTheme.typography.labelSmall,

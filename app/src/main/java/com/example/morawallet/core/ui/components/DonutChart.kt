@@ -54,7 +54,7 @@ fun DonutChart(
 
             if (total <= 0.0) return@Canvas
             var startAngle = -90f
-            val gap = 2f
+            val gap = if (slices.size > 1) 2f else 0f
             slices.forEach { slice ->
                 val sweep = (slice.value / total * 360f).toFloat()
                 if (sweep > 0f) {

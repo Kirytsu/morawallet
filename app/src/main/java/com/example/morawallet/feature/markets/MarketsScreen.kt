@@ -91,6 +91,7 @@ fun MarketsScreen(
                     RateCard(
                         code = code,
                         rate = rate,
+                        baseCurrency = state.baseCurrency,
                         color = MoraTheme.colors.chart[index % MoraTheme.colors.chart.size],
                         onClick = { onRateClick(state.baseCurrency, code) },
                     )
@@ -184,9 +185,15 @@ private fun MarketHeader(
 private fun RateCard(
     code: String,
     rate: Double,
+    baseCurrency: String,
     color: Color,
     onClick: () -> Unit,
 ) {
+    val rateLabel = when {
+        rate <= 0.0 -> "-"
+        rate >= 1.0 -> "1 $baseCurrency = ${formatRate(rate)} $code"
+        else -> "${formatRate(1.0 / rate)} $baseCurrency = 1 $code"
+    }
     Card(
         onClick = onClick,
         modifier = Modifier
@@ -222,10 +229,10 @@ private fun RateCard(
                 }
             }
             Text(
-                formatRate(rate),
-                style = MaterialTheme.typography.titleLarge,
+                rateLabel,
+                style = MaterialTheme.typography.titleSmall,
                 color = Color.White,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
             Text("Tap for history", style = MaterialTheme.typography.labelSmall, color = Color.White)

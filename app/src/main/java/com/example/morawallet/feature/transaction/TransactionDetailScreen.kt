@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -102,6 +105,7 @@ fun TransactionDetailScreen(
                     modifier = Modifier
                         .padding(padding)
                         .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
                         .padding(Spacing.lg),
                     verticalArrangement = Arrangement.spacedBy(Spacing.md),
                 ) {
@@ -122,7 +126,7 @@ fun TransactionDetailScreen(
                     }
                     DetailRow("Date", DateUtils.formatDate(txn.date))
                     DetailRow("Time", DateUtils.formatTime(txn.date))
-                    if (txn.note.isNotBlank()) DetailRow("Note", txn.note)
+                    if (txn.note.isNotBlank()) NoteRow(txn.note)
                 }
             }
         }
@@ -170,6 +174,8 @@ private fun DetailHeader(txn: Transaction) {
             text = prefix + CurrencyFormatter.format(txn.amount, txn.currencyCode),
             style = MaterialTheme.typography.headlineMedium,
             color = color,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(top = 12.dp),
         )
         Text(
@@ -188,7 +194,32 @@ private fun DetailRow(label: String, value: String) {
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(0.4f),
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.End,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            modifier = Modifier.weight(0.6f),
+        )
+    }
+}
+
+@Composable
+private fun NoteRow(note: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text("Note", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(note, style = MaterialTheme.typography.bodyLarge)
     }
 }

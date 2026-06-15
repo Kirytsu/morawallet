@@ -70,7 +70,7 @@ fun WalletCard(
                 }
             }
             Text(
-                text = CurrencyFormatter.format(balance, currencyCode),
+                text = CurrencyFormatter.formatCompact(balance, currencyCode),
                 style = MaterialTheme.typography.titleLarge,
                 color = content,
                 maxLines = 1,
