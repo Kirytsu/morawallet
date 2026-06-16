@@ -38,7 +38,7 @@ fun LoginScreen(
     onLoggedIn: () -> Unit,
     onNavigateToRegister: () -> Unit,
 ) {
-    val viewModel = moraViewModel { LoginViewModel(it.authRepository) }
+    val viewModel = moraViewModel { LoginViewModel(it.authRepository, it.userRepository) }
     val state = viewModel.state
 
     LaunchedEffect(state.success) {
@@ -97,6 +97,16 @@ fun LoginScreen(
             loading = state.loading,
             leadingIcon = Icons.AutoMirrored.Filled.Login,
             modifier = Modifier.padding(top = Spacing.xl),
+        )
+
+        GoogleSignInSection(
+            loading = state.googleLoading,
+            enabled = !state.loading,
+            onStart = viewModel::onGoogleStart,
+            onToken = viewModel::signInWithGoogle,
+            onCancelled = viewModel::onGoogleCancelled,
+            onError = viewModel::onGoogleError,
+            modifier = Modifier.padding(top = Spacing.sm),
         )
 
         Row(

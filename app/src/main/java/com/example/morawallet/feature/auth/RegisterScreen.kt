@@ -107,6 +107,16 @@ fun RegisterScreen(
             modifier = Modifier.padding(top = Spacing.xl),
         )
 
+        GoogleSignInSection(
+            loading = state.googleLoading,
+            enabled = !state.loading,
+            onStart = viewModel::onGoogleStart,
+            onToken = viewModel::signInWithGoogle,
+            onCancelled = viewModel::onGoogleCancelled,
+            onError = viewModel::onGoogleError,
+            modifier = Modifier.padding(top = Spacing.sm),
+        )
+
         Row(
             modifier = Modifier.padding(top = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically,
