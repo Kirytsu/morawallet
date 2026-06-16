@@ -31,6 +31,9 @@ app/google-services.json
 *.aab
 *.ap_
 
+# JVM crash / heap dumps (e.g. from D8 OutOfMemoryError during dexing)
+*.hprof
+
 # OS / editor noise
 .DS_Store
 Thumbs.db
