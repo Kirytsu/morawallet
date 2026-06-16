@@ -21,7 +21,7 @@ Built with Jetpack Compose and Material 3. Uses a blue/cyan palette with distinc
 - Kotlin
 - Jetpack Compose + Material 3
 - MVVM with repository layer
-- Firebase Auth + Cloud Firestore
+- Firebase Auth (Email/Password + Google via Credential Manager) + Cloud Firestore
 - Retrofit, OkHttp, kotlinx.serialization
 - DataStore Preferences
 - Coil for news thumbnails
@@ -47,6 +47,7 @@ Built with Jetpack Compose and Material 3. Uses a blue/cyan palette with distinc
 - Android Studio with Android SDK 36
 - JDK 11 or newer
 - A Firebase project
+- For Google Sign-In: a Play-enabled emulator/device with a Google account
 - Optional: a NewsAPI.org key for the News tab
 
 ### 2. Firebase
@@ -63,6 +64,36 @@ app/google-services.json
 5. Create a **Cloud Firestore** database.
 
 `app/google-services.json` is git-ignored — never commit it.
+
+#### Google Sign-In
+
+The login and register screens offer **Continue with Google**, implemented with the
+AndroidX **Credential Manager** API (not the deprecated `GoogleSignInClient`). To enable it:
+
+1. **Firebase Console → Authentication → Sign-in method → enable Google.**
+   This auto-creates the OAuth **Web client** for the project.
+2. **Register your signing certificate's SHA-1** so Google can verify the app.
+   Get the debug fingerprint with:
+
+   ```powershell
+   .\gradlew.bat :app:signingReport
+   ```
+
+   Copy the `SHA1` (and `SHA-256`) from the `debug` variant, then add it under
+   **Firebase Console → Project Settings → Your apps → Add fingerprint**.
+   Each developer machine has its own debug keystore, and release builds need the
+   release keystore's fingerprint added too.
+3. **Re-download `google-services.json`** into `app/` after the above — the web client
+   ID and certificate hashes are baked into it.
+
+No manual ID copy-paste is needed: the app reads `R.string.default_web_client_id`, which
+the `google-services` Gradle plugin generates from the web client (`client_type: 3`) entry
+in `google-services.json`.
+
+> **Runtime requirements:** the device/emulator must have **Google Play Services** (use a
+> Play-enabled emulator image, not plain AOSP) and at least one Google account signed in.
+> A `[28444] Developer console is not set up correctly` error means the SHA-1 or web client
+> ID does not match — re-check steps 2 and 3 and reinstall the app.
 
 ### 3. News API Key
 
