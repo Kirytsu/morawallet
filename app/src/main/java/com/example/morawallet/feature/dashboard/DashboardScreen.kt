@@ -109,7 +109,12 @@ fun DashboardScreen(
             item { AddWalletCta(onAddWallet) }
         } else {
             item {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                val screenWidth = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp.dp
+                val walletCardWidth = (screenWidth * 0.48f).coerceIn(164.dp, 196.dp)
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(end = Spacing.lg),
+                ) {
                     items(state.wallets, key = { it.id }) { wallet ->
                         WalletCard(
                             name = wallet.name,
@@ -117,7 +122,7 @@ fun DashboardScreen(
                             balance = wallet.balance,
                             colorIndex = wallet.colorIndex,
                             onClick = { onWalletClick(wallet.id) },
-                            modifier = Modifier.width(250.dp),
+                            modifier = Modifier.width(walletCardWidth),
                         )
                     }
                     item { AddWalletTile(onAddWallet) }

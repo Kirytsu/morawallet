@@ -46,6 +46,7 @@ import com.example.morawallet.data.model.Wallet
 import com.example.morawallet.di.moraViewModel
 import com.example.morawallet.ui.theme.MoraTheme
 import com.example.morawallet.ui.theme.Spacing
+import kotlin.math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -190,7 +191,7 @@ private fun WalletCategoryDonut(breakdown: List<Pair<String, Double>>, currency:
                     slices = top.mapIndexed { i, s -> DonutSlice(s.second, palette[i % palette.size]) },
                     diameter = 120.dp,
                     centerLabel = "Spent",
-                    centerValue = CurrencyFormatter.format(total, currency),
+                    centerValue = formatDonutCenterAmount(total, currency),
                 )
                 ChartLegend(
                     entries = top.mapIndexed { i, s ->
@@ -206,6 +207,24 @@ private fun WalletCategoryDonut(breakdown: List<Pair<String, Double>>, currency:
             }
         }
     }
+}
+
+private fun formatDonutCenterAmount(amount: Double, currency: String): String {
+    val symbol = CurrencyFormatter.symbol(currency)
+    val absoluteAmount = abs(amount)
+    val sign = if (amount < 0) "-" else ""
+    val (value, suffix) = when {
+        absoluteAmount >= 1_000_000_000.0 -> absoluteAmount / 1_000_000_000.0 to "B"
+        absoluteAmount >= 1_000_000.0 -> absoluteAmount / 1_000_000.0 to "M"
+        absoluteAmount >= 1_000.0 -> absoluteAmount / 1_000.0 to "K"
+        else -> return CurrencyFormatter.format(amount, currency)
+    }
+    val formatted = if (value < 10 && value % 1.0 != 0.0) {
+        "%.1f%s".format(value, suffix)
+    } else {
+        "%.0f%s".format(value, suffix)
+    }
+    return "$sign$symbol $formatted"
 }
 
 @Composable
